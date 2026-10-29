@@ -52,3 +52,10 @@ python -m pytest
 Sur Instagram : Paramètres › Espace Comptes › Vos informations et autorisations ›
 Télécharger vos informations › format **JSON**, qualité **élevée**, contenu
 « Publications ». Le .zip reçu se donne tel quel à `python -m zak corpus`.
+
+## Version web
+
+`web/` contient l'atelier en ligne (https://zakeazy.vercel.app) : le même moteur
+d'ombres porté en JavaScript (Canvas 2D), en direct dans le navigateur, avec export
+des calques et du script Photoshop. Site statique sans build ; en local :
+`python -m http.server -d web`.

@@ -1,0 +1,32 @@
+#target photoshop
+// Généré par l'Atelier Zak — reconstruit la composition calque par calque.
+(function () {
+    var here = new File($.fileName).parent;
+    var manifest = __MANIFEST__;
+    var doc = app.documents.add(manifest.width, manifest.height, 300, manifest.name,
+                                NewDocumentMode.RGB, DocumentFill.TRANSPARENT);
+    var groups = {};
+    for (var i = 0; i < manifest.layers.length; i++) {
+        var L = manifest.layers[i];
+        var src = app.open(new File(here + "/" + L.file));
+        var dup = src.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
+        src.close(SaveOptions.DONOTSAVECHANGES);
+        app.activeDocument = doc;
+        dup.name = L.name;
+        dup.blendMode = eval(L.blend);
+        dup.opacity = L.opacity;
+        if (L.group) {
+            if (!groups[L.group]) {
+                groups[L.group] = doc.layerSets.add();
+                groups[L.group].name = L.group;
+                groups[L.group].move(dup, ElementPlacement.PLACEBEFORE);
+            }
+            dup.move(groups[L.group], ElementPlacement.INSIDE);
+        }
+        dup.visible = L.visible;
+    }
+    // Supprime le calque transparent initial.
+    var base = doc.artLayers[doc.artLayers.length - 1];
+    if (base.name !== manifest.layers[0].name) { base.remove(); }
+    doc.saveAs(new File(here + "/" + manifest.name + ".psd"), new PhotoshopSaveOptions(), true);
+})();
