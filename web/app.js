@@ -41,8 +41,9 @@ function fileToImage(file) {
 
 async function setPlate(img) {
   const max = 2000;
-  const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
-  const c = E.canvas(img.naturalWidth * s, img.naturalHeight * s);
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const s = Math.min(1, max / Math.max(w, h));
+  const c = E.canvas(w * s, h * s);
   c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
   state.plate = c;
   state.W = c.width; state.H = c.height;
@@ -102,18 +103,23 @@ function buildLayers() {
   for (const [el] of order) {
     E.harmonize(el, state.plate);
     const g = el.name;
+    const add = (name, layer) => { if (layer.opacity > 0) layers.push({ name: `${g} · ${name}`, group: g, ...layer }); };
+    // Ombres et lumières réelles extraites de la photo : elles suivent le sujet.
+    for (const r of el.real || []) {
+      const c = E.canvas(W, H);
+      c.getContext("2d").drawImage(r.canvas, el.x - el.ox, el.y - el.oy);
+      layers.push({ name: `${g} · ${r.name}`, group: g, canvas: c, mode: r.mode, opacity: 1 });
+    }
     if (el.surface === "water") {
-      layers.push({ name: `${g} · reflet`, group: g, ...E.waterReflection(W, H, el, { opacity: el.reflection }) });
-      layers.push({ name: `${g} · ombre de contact`, group: g, ...E.contactShadow(W, H, el, tilt, { opacity: el.contact * 0.6 }) });
+      if (el.reflection > 0) add("reflet", E.waterReflection(W, H, el, { opacity: el.reflection }));
+      if (el.contact > 0) add("ombre de contact", E.contactShadow(W, H, el, tilt, { opacity: el.contact * 0.6 }));
     } else {
-      layers.push({ name: `${g} · ombre portée`, group: g, ...E.castShadow(W, H, el, light, tilt, { opacity: el.shadowOpacity, softness: el.softness }) });
-      if (el.surface === "ground") {
-        layers.push({ name: `${g} · ombre de contact`, group: g, ...E.contactShadow(W, H, el, tilt, { opacity: el.contact }) });
-      }
+      if (el.shadowOpacity > 0) add("ombre portée", E.castShadow(W, H, el, light, tilt, { opacity: el.shadowOpacity, softness: el.softness }));
+      if (el.surface === "ground" && el.contact > 0) add("ombre de contact", E.contactShadow(W, H, el, tilt, { opacity: el.contact }));
     }
     layers.push({ name: g, group: g, ...E.elementLayer(W, H, el) });
-    layers.push({ name: `${g} · ombre propre`, group: g, ...E.selfShade(W, H, el, light, { strength: el.shade }) });
-    layers.push({ name: `${g} · liseré de lumière`, group: g, ...E.rimLight(W, H, el, light, { opacity: el.rim }) });
+    if (el.shade > 0) add("ombre propre", E.selfShade(W, H, el, light, { strength: el.shade }));
+    if (el.rim > 0) add("liseré de lumière", E.rimLight(W, H, el, light, { opacity: el.rim }));
   }
   if (state.rays) layers.push({ name: "Rayons de soleil", group: null, ...E.sunRays(W, H, state.sun) });
   if (state.grain) {
@@ -495,8 +501,9 @@ function status(msg, kind = "") {
 
 async function shrinkToDataUrl(file, max = 1024) {
   const img = await fileToImage(file);
-  const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
-  const c = E.canvas(img.naturalWidth * s, img.naturalHeight * s);
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const s = Math.min(1, max / Math.max(w, h));
+  const c = E.canvas(w * s, h * s);
   c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
   return c.toDataURL("image/jpeg", 0.85);
 }
@@ -548,22 +555,23 @@ async function generate(random) {
     const hasard = random
       ? `lieu : ${pick(HASARD.lieux)} ; mécanique : ${pick(HASARD.mecaniques)} ; avec ${pick(HASARD.faune)} ; ambiance : ${pick(HASARD.ambiances)}`
       : null;
-    status("Claude imagine la scène dans l'univers de Zak…");
-    const plan = await api("api/plan", {
-      prompt: random ? "" : $("#genPrompt").value,
-      inspirations,
-      ressources: [...resources.keys()],
-      hasard,
-    });
-    status(`« ${plan.titre} » : génération du décor et de ${plan.elements.length} élément(s) en parallèle…`);
-    const seed = Math.floor(Math.random() * 1e9);
-    const jobs = [api("api/image", { prompt: plan.decor.prompt, kind: "decor", seed })];
-    for (const el of plan.elements) {
-      jobs.push(el.ressource && resources.has(el.ressource) ? Promise.resolve(null) : api("api/image", { prompt: el.prompt, kind: "element", seed }));
-    }
-    const results = await Promise.all(jobs);
-    status("Assemblage des calques : ombres, reflets, lumière…");
-    await buildWork(plan, results);
+    status("1/5 · Claude imagine la scène dans l'univers de Zak…");
+    const plan = await api("api/plan", { prompt: random ? "" : $("#genPrompt").value, inspirations, hasard });
+
+    status(`2/5 · « ${plan.titre} » : prise de vue photoréaliste…`);
+    const { image: sceneUrl } = await api("api/image", { op: "scene", prompt: plan.scene_prompt, seed: Math.floor(Math.random() * 1e9) });
+    const scene = await loadImage(sceneUrl);
+
+    status("3/5 · Claude repère les sujets, leurs ombres et la lumière…");
+    const lecture = await api("api/analyse", { image: sceneUrl, sujets: plan.sujets });
+
+    status(`4/5 · Détourage de ${lecture.sujets.length} sujet(s)…`);
+    const cutouts = await Promise.all(lecture.sujets.map((s) => cutoutSubject(scene, s)));
+
+    status("5/5 · Reconstitution du décor derrière les sujets…");
+    const plate = await cleanPlate(scene, lecture.sujets, cutouts, plan);
+
+    buildWork(plan, lecture, scene, plate, cutouts);
     const secs = ((performance.now() - t0) / 1000).toFixed(0);
     status(`« ${plan.titre} » prête en ${secs} s. ${plan.pitch}`, "ok");
   } catch (err) {
@@ -573,30 +581,190 @@ async function generate(random) {
   }
 }
 
-async function buildWork(plan, results) {
-  const [decor, ...els] = results;
-  await setPlate(await loadImage(decor.image));
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+
+function boxPx(box, W, H, pad = 0) {
+  const [x0, y0, x1, y1] = box;
+  const pw = (x1 - x0) * pad, ph = (y1 - y0) * pad;
+  const X0 = Math.floor(clamp01(x0 - pw) * W), Y0 = Math.floor(clamp01(y0 - ph) * H);
+  const X1 = Math.ceil(clamp01(x1 + pw) * W), Y1 = Math.ceil(clamp01(y1 + ph) * H);
+  return { x: X0, y: Y0, w: Math.max(1, X1 - X0), h: Math.max(1, Y1 - Y0) };
+}
+
+// Recadre le sujet (avec marge), le détoure, et le replace dans un calque
+// plein cadre à sa position exacte.
+async function cutoutSubject(scene, s) {
+  const W = scene.naturalWidth, H = scene.naturalHeight;
+  const r = boxPx(s.bbox, W, H, 0.12);
+  const crop = E.canvas(r.w, r.h);
+  crop.getContext("2d").drawImage(scene, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+  const { image } = await api("api/image", { op: "cutout", image: crop.toDataURL("image/png") });
+  const cut = await loadImage(image);
+  const full = E.canvas(W, H);
+  full.getContext("2d").drawImage(cut, r.x, r.y, r.w, r.h);
+  return full;
+}
+
+function feathered(W, H, rects, blur) {
+  const c = E.canvas(W, H);
+  const ctx = c.getContext("2d");
+  ctx.filter = `blur(${blur}px)`;
+  ctx.fillStyle = "#fff";
+  for (const r of rects) ctx.fillRect(r.x, r.y, r.w, r.h);
+  return c;
+}
+
+// Décor sans les sujets ni leurs ombres : masque = sujets dilatés + zones
+// d'ombres, rempli par l'IA, puis recollé sur la photo d'origine pour que
+// tout ce qui est hors masque reste au pixel près.
+async function cleanPlate(scene, sujets, cutouts, plan) {
+  const W = scene.naturalWidth, H = scene.naturalHeight;
+  const grow = Math.round(W * 0.012);
+  const mask = E.canvas(W, H);
+  const m = mask.getContext("2d");
+  m.fillStyle = "#000";
+  m.fillRect(0, 0, W, H);
+  m.filter = `blur(${grow}px)`;
+  for (const c of cutouts) {
+    const sil = E.canvas(W, H);
+    const sctx = sil.getContext("2d");
+    sctx.drawImage(c, 0, 0);
+    sctx.globalCompositeOperation = "source-in";
+    sctx.fillStyle = "#fff";
+    sctx.fillRect(0, 0, W, H);
+    for (let k = 0; k < 3; k++) m.drawImage(sil, 0, 0); // dilatation par flou empilé
+  }
+  m.filter = "none";
+  m.drawImage(feathered(W, H, sujets.map((s) => boxPx(s.zone_ombres, W, H)), grow), 0, 0);
+  // Masque binaire pour le remplissage.
+  const md = m.getImageData(0, 0, W, H);
+  for (let i = 0; i < md.data.length; i += 4) {
+    const v = md.data[i] > 20 ? 255 : 0;
+    md.data[i] = md.data[i + 1] = md.data[i + 2] = v;
+  }
+  m.putImageData(md, 0, 0);
+
+  const sceneCanvas = E.canvas(W, H);
+  sceneCanvas.getContext("2d").drawImage(scene, 0, 0);
+  let filled;
+  try {
+    const { image } = await api("api/image", {
+      op: "fill",
+      image: sceneCanvas.toDataURL("image/jpeg", 0.92),
+      mask: mask.toDataURL("image/png"),
+      prompt: `${plan.ambiance}. The same place without ${sujets.map((s) => s.nom).join(", ")}: continue the background, water, sky and ground seamlessly with identical lighting and perspective.`,
+    });
+    filled = await loadImage(image);
+  } catch (err) {
+    console.warn("Remplissage impossible, décor d'origine conservé :", err);
+    return sceneCanvas;
+  }
+  // Recollage : photo d'origine hors masque, remplissage dedans (bord adouci).
+  const soft = E.canvas(W, H);
+  const sctx = soft.getContext("2d");
+  sctx.filter = `blur(${Math.max(2, grow / 2)}px)`;
+  sctx.drawImage(mask, 0, 0);
+  const fillLayer = E.canvas(W, H);
+  const f = fillLayer.getContext("2d");
+  f.drawImage(filled, 0, 0, W, H);
+  f.globalCompositeOperation = "destination-in";
+  // Le masque est en niveaux de gris : on le convertit en alpha.
+  const alpha = sctx.getImageData(0, 0, W, H);
+  for (let i = 0; i < alpha.data.length; i += 4) alpha.data[i + 3] = alpha.data[i];
+  sctx.putImageData(alpha, 0, 0);
+  f.drawImage(soft, 0, 0);
+  const out = E.canvas(W, H);
+  const o = out.getContext("2d");
+  o.drawImage(scene, 0, 0);
+  o.drawImage(fillLayer, 0, 0);
+  return out;
+}
+
+// Ombres et lumières réelles d'un sujet : ce qui différencie la photo du
+// décor reconstitué dans sa zone. Produit (photo / décor) pour ce qui
+// assombrit, Écran pour ce qui éclaircit : recomposées, elles redonnent la
+// photo d'origine au pixel près, et suivent le sujet quand on le déplace.
+function realEffects(scene, plate, zone, cutout, W, H) {
+  const r = boxPx(zone, W, H, 0.05);
+  const sc = E.canvas(W, H).getContext("2d", { willReadFrequently: true });
+  sc.drawImage(scene, 0, 0, W, H);
+  const pc = E.canvas(W, H).getContext("2d", { willReadFrequently: true });
+  pc.drawImage(plate, 0, 0, W, H);
+  const cc = E.canvas(W, H).getContext("2d", { willReadFrequently: true });
+  cc.drawImage(cutout, 0, 0);
+  const zoneMask = feathered(W, H, [r], Math.round(W * 0.01)).getContext("2d").getImageData(r.x, r.y, r.w, r.h).data;
+  const S = sc.getImageData(r.x, r.y, r.w, r.h).data;
+  const P = pc.getImageData(r.x, r.y, r.w, r.h).data;
+  const C = cc.getImageData(r.x, r.y, r.w, r.h).data;
+  const mul = new ImageData(r.w, r.h);
+  const scr = new ImageData(r.w, r.h);
+  for (let i = 0; i < S.length; i += 4) {
+    const a = (zoneMask[i] / 255) * (1 - C[i + 3] / 255);
+    for (let k = 0; k < 3; k++) {
+      const s = S[i + k] / 255, p = P[i + k] / 255;
+      mul.data[i + k] = 255 * (s < p ? s / Math.max(p, 1 / 255) : 1);
+      scr.data[i + k] = 255 * (s > p ? 1 - (1 - s) / Math.max(1 - p, 1 / 255) : 0);
+    }
+    mul.data[i + 3] = scr.data[i + 3] = 255 * a;
+  }
+  const toLayer = (img) => {
+    const c = E.canvas(W, H);
+    c.getContext("2d").putImageData(img, r.x, r.y);
+    return c;
+  };
+  return { shadow: toLayer(mul), light: toLayer(scr) };
+}
+
+function trimWithOffset(full) {
+  const ctx = full.getContext("2d", { willReadFrequently: true });
+  const { data, width, height } = ctx.getImageData(0, 0, full.width, full.height);
+  let x0 = width, y0 = height, x1 = -1, y1 = -1;
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    if (data[(y * width + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  if (x1 < 0) return null;
+  const c = E.canvas(x1 - x0 + 1, y1 - y0 + 1);
+  c.getContext("2d").drawImage(full, -x0, -y0);
+  return { src: c, x0, y0 };
+}
+
+function buildWork(plan, lecture, scene, plate, cutouts) {
+  setPlate(plate);
   const { W, H } = state;
   state.elements = [];
   state.layerFx = {};
   state.selectedLayer = null;
-  for (let i = 0; i < plan.elements.length; i++) {
-    const p = plan.elements[i];
-    const img = els[i] ? await loadImage(els[i].image) : resources.get(p.ressource);
-    if (!img) continue;
-    const src = E.trim(img);
-    addElement(img, p.nom, {
-      x: p.x * W,
-      y: p.y * H,
-      scale: Math.max(0.05, (p.hauteur * H) / src.height),
-      surface: p.surface,
-      height: Math.max(0, p.altitude * H),
+  lecture.sujets.forEach((s, i) => {
+    const t = trimWithOffset(cutouts[i]);
+    if (!t) return;
+    const fx = realEffects(scene, plate, s.zone_ombres, cutouts[i], W, H);
+    const x = t.x0 + t.src.width / 2, y = t.y0 + t.src.height; // base du sujet
+    state.elements.push({
+      name: s.nom, src: t.src, tinted: null, x, y, ox: x, oy: y, scale: 1,
+      surface: s.surface === "air" ? "air" : "ground", height: 0, immersion: 0, match: 0,
+      // Les vraies ombres sont dans les calques extraits ; les effets du
+      // moteur restent disponibles (à 0) pour un sujet qu'on déplace.
+      shadowOpacity: 0, softness: 1, contact: 0, shade: 0, rim: 0, reflection: 0,
+      real: [
+        { name: "ombres et reflets réels", canvas: fx.shadow, mode: "multiply" },
+        { name: "lumières réelles", canvas: fx.light, mode: "screen" },
+      ],
+      visible: true,
     });
+  });
+  // Ressources PNG fournies : posées au premier plan avec les effets du moteur.
+  let k = 0;
+  for (const [name, img] of resources) {
+    const src = E.trim(img);
+    addElement(img, name, { x: W * (0.3 + 0.4 * (k++ % 2)), y: H * 0.88, scale: Math.min(1, (H * 0.25) / src.height) });
   }
-  state.sun = { x: plan.lumiere.soleil_x * W, y: plan.lumiere.soleil_y * H };
+  state.selected = state.elements.length ? 0 : -1;
+  state.sun = { x: lecture.lumiere.soleil_x * W, y: lecture.lumiere.soleil_y * H };
   state.autoLight = false;
   $("#autoLight").checked = false;
-  state.light = { azimuth: Math.round(plan.lumiere.azimut), elevation: Math.round(plan.lumiere.elevation) };
+  state.light = { azimuth: Math.round(lecture.lumiere.azimut), elevation: Math.round(lecture.lumiere.elevation) };
+  // La photo porte déjà sa lumière et sa colorimétrie.
+  for (const k2 of ["rays", "grade", "grain"]) { state[k2] = false; $(`#${k2}`).checked = false; }
   updateLight();
   saveWork(plan);
   refreshPanels();
@@ -607,6 +775,7 @@ function snapshot() {
   return {
     plate: state.plate, W: state.W, H: state.H, sun: { ...state.sun }, light: { ...state.light },
     autoLight: state.autoLight, tilt: state.tilt, layerFx: structuredClone(state.layerFx),
+    rays: state.rays, grade: state.grade, grain: state.grain,
     elements: state.elements.map((e) => ({ ...e })),
   };
 }
@@ -635,7 +804,8 @@ function renderWorks() {
 
 function restore(i) {
   const s = state.works[i].snap;
-  Object.assign(state, { plate: s.plate, W: s.W, H: s.H, sun: { ...s.sun }, light: { ...s.light }, autoLight: s.autoLight, tilt: s.tilt, layerFx: structuredClone(s.layerFx) });
+  Object.assign(state, { plate: s.plate, W: s.W, H: s.H, sun: { ...s.sun }, light: { ...s.light }, autoLight: s.autoLight, tilt: s.tilt, layerFx: structuredClone(s.layerFx), rays: s.rays, grade: s.grade, grain: s.grain });
+  for (const k of ["rays", "grade", "grain"]) $(`#${k}`).checked = s[k];
   state.elements = s.elements.map((e) => ({ ...e }));
   state.selected = 0;
   view.width = s.W; view.height = s.H;

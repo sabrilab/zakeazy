@@ -59,3 +59,14 @@ Télécharger vos informations › format **JSON**, qualité **élevée**, conte
 d'ombres porté en JavaScript (Canvas 2D), en direct dans le navigateur, avec export
 des calques et du script Photoshop. Site statique sans build ; en local :
 `python -m http.server -d web`.
+
+### Génération d'œuvres (zakeazy.vercel.app)
+
+1. `api/plan` : Claude conçoit l'œuvre dans l'univers de Zak (prompt, inspirations ou hasard) et écrit le prompt d'une vraie photo.
+2. `api/image` op `scene` : la scène entière est générée d'un bloc (lumière, eau, reflets cohérents).
+3. `api/analyse` : Claude repère chaque sujet, la zone de ses ombres et la lumière.
+4. `api/image` op `cutout` : chaque sujet est détouré (BiRefNet).
+5. `api/image` op `fill` : le décor est reconstitué sous les sujets et leurs ombres.
+6. Dans le navigateur : les vraies ombres et lumières sont extraites (photo ÷ décor → Produit, et Écran), en calques qui suivent leur sujet.
+
+Variables Vercel : `ANTHROPIC_API_KEY`, `FAL_KEY` (option : `FAL_MODEL`, `FAL_FILL_MODEL`, `CLAUDE_MODEL`).
