@@ -46,3 +46,13 @@ def test_agent_envoie_style_et_fallback():
     assert call["model"] == "claude-opus-5-5"
     assert call["fallbacks"] == "default"
     assert "Zak Eazy" in call["system"][0]["text"] and "lumiere_et_ombres" in call["system"][0]["text"]
+
+
+def test_style_web_synchronise():
+    """web/api/_style.js doit refléter style/zak_style.yaml (scripts/sync_style.py)."""
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    yaml_text = (root / "style" / "zak_style.yaml").read_text(encoding="utf-8")
+    js = (root / "web" / "api" / "_style.js").read_text(encoding="utf-8")
+    assert json.dumps(yaml_text, ensure_ascii=False) in js

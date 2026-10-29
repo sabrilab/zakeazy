@@ -16,6 +16,9 @@ const state = {
   elements: [],
   selected: -1,
   tool: "move", // move | sun
+  layerFx: {}, // retouches par calque : { [nom]: { visible, opacity, mode } }
+  selectedLayer: null,
+  works: [], // œuvres générées
 };
 
 let grainLayer = null;
@@ -117,7 +120,7 @@ function buildLayers() {
     if (!grainLayer || grainLayer.canvas.width !== W) grainLayer = E.grain(W, H);
     layers.push({ name: "Grain", group: null, ...grainLayer });
   }
-  return layers;
+  return layers.map((l) => ({ visible: true, ...l, ...(state.layerFx[l.name] || {}) }));
 }
 
 const MODES = { normal: "source-over", multiply: "multiply", screen: "screen", overlay: "overlay", soft_light: "soft-light" };
@@ -126,6 +129,7 @@ function flatten(layers, ctx) {
   ctx.save();
   ctx.clearRect(0, 0, state.W, state.H);
   for (const l of layers) {
+    if (l.visible === false) continue;
     ctx.globalCompositeOperation = MODES[l.mode];
     ctx.globalAlpha = l.opacity;
     ctx.drawImage(l.canvas, 0, 0);
@@ -236,17 +240,59 @@ view.addEventListener("wheel", (ev) => {
 
 // --- Panneaux ------------------------------------------------------------------
 
+const MODE_NAMES = { normal: "Normal", multiply: "Produit", screen: "Écran", overlay: "Incrustation", soft_light: "Lumière douce" };
+
 function renderLayersList(layers) {
   const ul = $("#layers");
   ul.innerHTML = "";
-  const names = { normal: "Normal", multiply: "Produit", screen: "Écran", overlay: "Incrustation" };
   [...layers].reverse().forEach((l) => {
     const li = document.createElement("li");
     if (l.group) li.classList.add("in-group");
-    li.innerHTML = `<span class="lname"></span><span class="lmode">${names[l.mode]} · ${Math.round(l.opacity * 100)}%</span>`;
+    if (l.name === state.selectedLayer) li.classList.add("sel");
+    if (l.visible === false) li.classList.add("off");
+    li.innerHTML = `<button class="eye" aria-label="Afficher / masquer">${l.visible === false ? "◌" : "●"}</button><span class="lname"></span><span class="lmode">${MODE_NAMES[l.mode]} · ${Math.round(l.opacity * 100)}%</span>`;
     li.querySelector(".lname").textContent = l.name;
+    li.querySelector(".eye").onclick = (e) => {
+      e.stopPropagation();
+      setFx(l.name, { visible: l.visible === false });
+    };
+    li.onclick = () => {
+      state.selectedLayer = l.name;
+      const i = state.elements.findIndex((el) => el.name === l.group);
+      if (i >= 0) state.selected = i;
+      refreshPanels();
+      schedule();
+    };
     ul.appendChild(li);
   });
+  renderLayerControls(layers.find((l) => l.name === state.selectedLayer));
+}
+
+function setFx(name, fx) {
+  state.layerFx[name] = { ...(state.layerFx[name] || {}), ...fx };
+  schedule();
+}
+
+function renderLayerControls(layer) {
+  const box = $("#layerControls");
+  if (!layer) { box.innerHTML = `<p class="hint">Clique un calque pour régler son opacité et son mode de fusion, ou sur ● pour le masquer.</p>`; return; }
+  if (box.dataset.layer === layer.name && box.contains(document.activeElement)) return;
+  box.dataset.layer = layer.name;
+  box.innerHTML = `
+    <p class="lsel"></p>
+    <label class="slider"><span>Opacité</span><input type="range" min="0" max="1" step="0.01"><output></output></label>
+    <label class="row">Mode de fusion <select>${Object.entries(MODE_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
+    <button class="btn ghost reset">Réinitialiser ce calque</button>`;
+  box.querySelector(".lsel").textContent = layer.name;
+  const range = box.querySelector("input");
+  const out = box.querySelector("output");
+  range.value = layer.opacity;
+  out.textContent = `${Math.round(layer.opacity * 100)}%`;
+  range.oninput = () => { out.textContent = `${Math.round(range.value * 100)}%`; setFx(layer.name, { opacity: +range.value }); };
+  const sel = box.querySelector("select");
+  sel.value = layer.mode;
+  sel.onchange = () => setFx(layer.name, { mode: sel.value });
+  box.querySelector(".reset").onclick = () => { delete state.layerFx[layer.name]; box.dataset.layer = ""; schedule(); };
 }
 
 const FIELDS = [
@@ -384,7 +430,7 @@ $("#exportPsd").onclick = async () => {
       const c = E.canvas(state.W, state.H);
       c.getContext("2d").drawImage(l.canvas, 0, 0);
       zip.file(file, await new Promise((ok) => c.toBlob(ok, "image/png")));
-      manifest.layers.push({ file, name: l.name, blend: PS_BLEND[l.mode], opacity: Math.round(l.opacity * 1000) / 10, visible: true, group: l.group });
+      manifest.layers.push({ file, name: l.name, blend: PS_BLEND[l.mode], opacity: Math.round(l.opacity * 1000) / 10, visible: l.visible !== false, group: l.group });
     }
     const flat = E.canvas(state.W, state.H);
     flatten(layers, flat.getContext("2d"));
@@ -426,6 +472,182 @@ document.querySelectorAll("[data-tab]").forEach((b) => (b.onclick = () => {
   document.querySelectorAll("[data-tab]").forEach((x) => x.classList.toggle("on", x === b));
   document.querySelectorAll(".tab").forEach((t) => (t.hidden = t.id !== b.dataset.tab));
 }));
+
+
+// --- Génération d'œuvres -------------------------------------------------------------
+
+const HASARD = {
+  lieux: ["le beffroi de Lille", "la Vieille Bourse de Lille", "l'Opéra de Lille", "la Grand Place de Lille", "la Tour Eiffel", "l'Arc de Triomphe", "le Mont-Saint-Michel", "le Burj Al Arab", "le Taj Mahal", "Big Ben", "le Colisée", "la Sagrada Família", "Tower Bridge", "les Moaï de l'île de Pâques", "l'Opéra de Sydney", "un phare breton", "la Tour de Pise", "le Château de Chambord", "le Pont du Gard", "une gare Art nouveau"],
+  mecaniques: ["déplacement", "immersion", "élévation", "échelle", "cadre", "métamorphose"],
+  faune: ["des orques", "une baleine à bosse", "des raies manta", "des flamants roses", "des méduses lumineuses", "une pieuvre géante", "des dauphins", "des tortues de mer", "des carpes koï", "un cerf blanc", "des éléphants", "des montgolfières", "des cerisiers en fleurs", "une jungle tropicale"],
+  ambiances: ["coucher de soleil pastel", "aube brumeuse rose", "heure dorée", "ciel de nuages cotonneux", "lumière d'après l'orage", "crépuscule lavande"],
+};
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+const inspirations = []; // data URLs
+const resources = new Map(); // nom -> HTMLImageElement
+
+function status(msg, kind = "") {
+  const el = $("#genStatus");
+  el.textContent = msg;
+  el.className = `gen-status ${kind}`;
+}
+
+async function shrinkToDataUrl(file, max = 1024) {
+  const img = await fileToImage(file);
+  const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = E.canvas(img.naturalWidth * s, img.naturalHeight * s);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.85);
+}
+
+function renderChips() {
+  const box = $("#inspoList");
+  box.innerHTML = "";
+  inspirations.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.className = "chip img";
+    b.style.backgroundImage = `url(${d})`;
+    b.title = "Retirer";
+    b.onclick = () => { inspirations.splice(i, 1); renderChips(); };
+    box.appendChild(b);
+  });
+  for (const [name, img] of resources) {
+    const b = document.createElement("button");
+    b.className = "chip img res";
+    b.style.backgroundImage = `url(${img.src})`;
+    b.title = `${name} (retirer)`;
+    b.onclick = () => { resources.delete(name); renderChips(); };
+    box.appendChild(b);
+  }
+}
+
+$("#inspoInput").onchange = async (e) => {
+  for (const f of e.target.files) if (inspirations.length < 6) inspirations.push(await shrinkToDataUrl(f));
+  e.target.value = "";
+  renderChips();
+};
+$("#resInput").onchange = async (e) => {
+  for (const f of e.target.files) resources.set(f.name.replace(/\.[^.]+$/, ""), await fileToImage(f));
+  e.target.value = "";
+  renderChips();
+};
+
+async function api(path, body) {
+  const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({ error: `${r.status} ${r.statusText}` }));
+  if (!r.ok) throw new Error(data.error || r.statusText);
+  return data;
+}
+
+async function generate(random) {
+  const btns = [$("#genBtn"), $("#genRandom")];
+  btns.forEach((b) => (b.disabled = true));
+  const t0 = performance.now();
+  try {
+    const hasard = random
+      ? `lieu : ${pick(HASARD.lieux)} ; mécanique : ${pick(HASARD.mecaniques)} ; avec ${pick(HASARD.faune)} ; ambiance : ${pick(HASARD.ambiances)}`
+      : null;
+    status("Claude imagine la scène dans l'univers de Zak…");
+    const plan = await api("api/plan", {
+      prompt: random ? "" : $("#genPrompt").value,
+      inspirations,
+      ressources: [...resources.keys()],
+      hasard,
+    });
+    status(`« ${plan.titre} » : génération du décor et de ${plan.elements.length} élément(s) en parallèle…`);
+    const seed = Math.floor(Math.random() * 1e9);
+    const jobs = [api("api/image", { prompt: plan.decor.prompt, kind: "decor", seed })];
+    for (const el of plan.elements) {
+      jobs.push(el.ressource && resources.has(el.ressource) ? Promise.resolve(null) : api("api/image", { prompt: el.prompt, kind: "element", seed }));
+    }
+    const results = await Promise.all(jobs);
+    status("Assemblage des calques : ombres, reflets, lumière…");
+    await buildWork(plan, results);
+    const secs = ((performance.now() - t0) / 1000).toFixed(0);
+    status(`« ${plan.titre} » prête en ${secs} s. ${plan.pitch}`, "ok");
+  } catch (err) {
+    status(`Échec : ${err.message}`, "err");
+  } finally {
+    btns.forEach((b) => (b.disabled = false));
+  }
+}
+
+async function buildWork(plan, results) {
+  const [decor, ...els] = results;
+  await setPlate(await loadImage(decor.image));
+  const { W, H } = state;
+  state.elements = [];
+  state.layerFx = {};
+  state.selectedLayer = null;
+  for (let i = 0; i < plan.elements.length; i++) {
+    const p = plan.elements[i];
+    const img = els[i] ? await loadImage(els[i].image) : resources.get(p.ressource);
+    if (!img) continue;
+    const src = E.trim(img);
+    addElement(img, p.nom, {
+      x: p.x * W,
+      y: p.y * H,
+      scale: Math.max(0.05, (p.hauteur * H) / src.height),
+      surface: p.surface,
+      height: Math.max(0, p.altitude * H),
+    });
+  }
+  state.sun = { x: plan.lumiere.soleil_x * W, y: plan.lumiere.soleil_y * H };
+  state.autoLight = false;
+  $("#autoLight").checked = false;
+  state.light = { azimuth: Math.round(plan.lumiere.azimut), elevation: Math.round(plan.lumiere.elevation) };
+  updateLight();
+  saveWork(plan);
+  refreshPanels();
+  schedule();
+}
+
+function snapshot() {
+  return {
+    plate: state.plate, W: state.W, H: state.H, sun: { ...state.sun }, light: { ...state.light },
+    autoLight: state.autoLight, tilt: state.tilt, layerFx: structuredClone(state.layerFx),
+    elements: state.elements.map((e) => ({ ...e })),
+  };
+}
+
+function saveWork(plan) {
+  const thumb = E.canvas(120, 150);
+  thumb.getContext("2d").drawImage(state.plate, 0, 0, 120, 150);
+  state.works.unshift({ plan, thumb: thumb.toDataURL("image/jpeg", 0.7), snap: snapshot() });
+  renderWorks();
+}
+
+function renderWorks() {
+  const box = $("#works");
+  box.innerHTML = "";
+  state.works.forEach((w, i) => {
+    const b = document.createElement("button");
+    b.className = "work";
+    b.innerHTML = `<img alt=""><span></span>`;
+    b.querySelector("img").src = w.thumb;
+    b.querySelector("span").textContent = w.plan.titre;
+    b.title = w.plan.pitch;
+    b.onclick = () => restore(i);
+    box.appendChild(b);
+  });
+}
+
+function restore(i) {
+  const s = state.works[i].snap;
+  Object.assign(state, { plate: s.plate, W: s.W, H: s.H, sun: { ...s.sun }, light: { ...s.light }, autoLight: s.autoLight, tilt: s.tilt, layerFx: structuredClone(s.layerFx) });
+  state.elements = s.elements.map((e) => ({ ...e }));
+  state.selected = 0;
+  view.width = s.W; view.height = s.H;
+  grainLayer = null;
+  $("#autoLight").checked = s.autoLight;
+  updateLight();
+  refreshPanels();
+  status(`${state.works[i].plan.titre} : ${state.works[i].plan.pitch}`, "ok");
+}
+
+$("#genBtn").onclick = () => generate(false);
+$("#genRandom").onclick = () => generate(true);
 
 refreshPanels();
 loadDemo();

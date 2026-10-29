@@ -27,6 +27,21 @@
 
   <main id="atelier" class="tab">
     <aside class="panel left">
+      <section class="gen">
+        <h2>Générer une œuvre</h2>
+        <textarea id="genPrompt" rows="3" placeholder="Ex. : la Vieille Bourse de Lille engloutie, des raies manta qui volent entre les toits au coucher du soleil"></textarea>
+        <div class="gen-row">
+          <label class="btn small file">+ Inspirations<input id="inspoInput" type="file" accept="image/*" multiple></label>
+          <label class="btn small file">+ Ressources PNG<input id="resInput" type="file" accept="image/png,image/webp" multiple></label>
+        </div>
+        <div id="inspoList" class="chips"></div>
+        <div class="gen-row">
+          <button id="genBtn" class="btn primary">Générer</button>
+          <button id="genRandom" class="btn">Au hasard</button>
+        </div>
+        <p id="genStatus" class="gen-status" aria-live="polite"></p>
+        <div id="works" class="works"></div>
+      </section>
       <section>
         <h2>Sources</h2>
         <label class="btn file">Photo de fond<input id="plateInput" type="file" accept="image/*"></label>
@@ -74,8 +89,9 @@
         <button id="exportPng" class="btn ghost">Image aplatie (.png)</button>
       </section>
       <section>
-        <h2>Calques générés</h2>
+        <h2>Calques</h2>
         <ul id="layers" class="layers"></ul>
+        <div id="layerControls" class="layer-controls"></div>
       </section>
     </aside>
   </main>
@@ -118,7 +134,7 @@
       <h3>Ce qui vient ensuite</h3>
       <ul>
         <li>Recaler la palette et les réglages sur ses œuvres Instagram.</li>
-        <li>L'agent Claude dans l'atelier : analyse automatique de la lumière d'une photo, idées de concepts, critique d'un rendu.</li>
+        <li>Critique automatique d'un rendu par Claude, et variations d'une œuvre réussie.</li>
         <li>Un panneau directement dans Photoshop.</li>
       </ul>
       <p class="hint">Sources : interviews Maze (2020), Transphotographiques (2021), Blow (2021), Daily Geek Show, Demilked, Magzoid, Cosmopola.</p>
