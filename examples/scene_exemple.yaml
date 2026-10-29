@@ -1,0 +1,33 @@
+# Exemple de scène. Remplacer les chemins par de vraies sources :
+#   plate : la photo de fond (« LA photo »)
+#   image : PNG détourés (fond transparent)
+# Lancer : python -m zak compose examples/scene_exemple.yaml -o sortie/
+plate: sources/decor.png          # généré par examples/demo.py
+light: auto                       # ou {azimuth: 120, elevation: 18} (valeurs de `zak analyse`)
+ground_tilt: 0.45                 # 0.2 sol vu rasant, 0.8 vu de haut
+sun_rays: true
+grade: true                       # étalonnage pastel de style/zak_style.yaml
+grain: 0.035
+elements:
+  - name: Beffroi
+    image: sources/beffroi.png
+    x: 330                        # centre du point d'appui
+    y: 1080                       # ligne de contact au sol
+    scale: 1.0
+    surface: ground
+    shadow: {opacity: 0.55, softness: 1.0, contact: 0.85, propre: 0.55}
+  - name: Orque
+    image: sources/orque.png
+    x: 820
+    y: 1040                       # ligne d'eau
+    scale: 0.9
+    surface: water
+    immersion: 0.3                # part de la hauteur sous l'eau
+  - name: Maison volante
+    image: sources/maison.png
+    x: 760
+    y: 900                        # sol sous l'objet
+    scale: 0.7
+    surface: air
+    height: 420                   # px au-dessus du sol
+    haze: 0.15                    # perspective atmosphérique

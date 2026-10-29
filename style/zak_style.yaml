@@ -1,0 +1,77 @@
+# ADN visuel de Zak Eazy — version 0.1
+# Construit à partir des interviews publiques (2020-2025). Chaque valeur
+# chiffrée est une HYPOTHÈSE de départ à recaler sur le corpus Instagram
+# (voir `zak corpus`), puis à valider avec Zak lui-même.
+
+artiste: Zak Eazy
+devise: "La tête dans les nuages, les pieds sur terre"
+
+themes:
+  sujets_principaux:
+    - architecture et monuments reconnaissables (beffroi de Lille, Vieille Bourse, Opéra, Burj Al Arab, Dubai Frame, Tour Eiffel, Taj Mahal...)
+    - nature (mer, falaises, végétation tropicale, nuages, couchers de soleil)
+    - animaux déplacés (orques, dauphins, pieuvre géante, flamants roses)
+  mecaniques_surrealistes:
+    - deplacement: "un monument familier transporté dans un paysage lointain (beffroi sur le rocher de Khao Phing Kan)"
+    - immersion: "la ville envahie par l'eau ou la jungle, la faune marine nage entre les bâtiments"
+    - elevation: "monument posé sur un nuage ou flottant dans le ciel"
+    - echelle: "animal ou objet à une échelle impossible (pieuvre enlaçant la Chambre de Commerce)"
+    - cadre: "un élément sert de fenêtre entre deux mondes (Dubai Frame : ancien / nouveau Dubaï)"
+    - metamorphose: "un objet du quotidien se transforme (panier de basket en nuage de fleurs)"
+  intention: "Faire voir le quotidien sous un autre angle ; provoquer curiosité et questionnement ; lecture ouverte, du féerique à l'apocalyptique."
+  influences: [Salvador Dalí, Hayao Miyazaki (palette), Julien Tabet, Dragon Ball Z (Kaio), publicité, voyages]
+
+colorimetrie:
+  dominante: pastel, doux, lumineux (il est passé de tons sombres à des tons clairs)
+  palette_reference:          # hypothèse « coucher de soleil pastel », à recaler
+    ciel_haut:   "#9FB8E0"
+    ciel_bas:    "#F6C8B8"
+    soleil:      "#FFE3B0"
+    eau:         "#7FC3C9"
+    ombre:       "#6F6A9A"     # les ombres sont teintées violet/bleu, jamais noires
+    vegetation:  "#7FB58A"
+    pierre:      "#E8D6C4"
+  etalonnage:
+    noir_releve: 0.10          # point noir de sortie (0-1) : pas de noir pur
+    blanc_max: 0.97
+    saturation: 0.88           # légère désaturation globale
+    teinte_ombres: "#7A6FB0"   # split toning ombres -> lavande
+    teinte_lumieres: "#FFD2B0" # split toning hautes lumières -> pêche
+    force_split: 0.18
+
+lumiere_et_ombres:
+  principe: "Surréaliste dans l'idée, réaliste dans le détail : grand soin des ombres des animaux et des rayons du soleil."
+  regles:
+    - une seule source principale (soleil bas, souvent couchant) ; direction cohérente pour TOUS les éléments
+    - ombre portée = projection sur le plan du sol, longueur liée à la hauteur du soleil
+    - pénombre qui s'élargit avec la distance au point de contact
+    - ombre de contact dense et courte sous chaque appui (pattes, base des bâtiments)
+    - couleur d'ombre = couleur du ciel assombrie, mode Produit (multiply)
+    - sur l'eau : reflet inversé, ondulé, atténué, plutôt qu'une ombre dure
+    - light wrap : les bords des éléments prennent la lumière du décor
+    - rayons de soleil volumétriques en mode Superposition/Écran
+  defauts:
+    elevation_soleil_deg: 25
+    inclinaison_sol: 0.45      # écrasement perspective du plan du sol
+    opacite_ombre_portee: 0.55
+    opacite_ombre_contact: 0.85
+
+composition:
+  - une image source forte (« LA photo ») dicte perspective, angle et horizon ; le monde est construit autour
+  - monument comme point focal, souvent centré ou sur un tiers, vu en contre-plongée légère
+  - horizon bas, grand ciel qui porte l'ambiance
+  - profondeur par perspective atmosphérique (brume teintée vers le lointain)
+  - formats Instagram : 4:5 portrait (1080x1350) en priorité
+
+matieres_et_textures:
+  - pierre et façades photographiques réelles (Lille : brique, pierre sculptée flamande)
+  - eau lisse et miroitante, écume légère
+  - nuages volumineux et cotonneux
+  - végétation tropicale dense
+  - peau lisse et brillante des mammifères marins
+  - grain fin et unifié sur toute l'image pour fondre les sources
+
+processus:
+  temps_par_oeuvre_heures: [7, 20]
+  demarrage: "80 % intuition (une photo inspire, il ouvre Photoshop), 20 % idée précise issue d'un carnet de 50+ idées"
+  etape_la_plus_longue: "trouver les bonnes images et les bons points de vue (banques libres, photographes amis, ses propres photos)"

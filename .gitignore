@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+sortie/
+corpus/
+examples/sortie/
+examples/sources/

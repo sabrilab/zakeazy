@@ -1,0 +1,54 @@
+# Atelier Zak
+
+Un assistant de création pour **Zak Eazy**, artiste de photomontage surréaliste sous
+Photoshop. Il comprend son style (thèmes, palette pastel, composition, matières) et
+prend en charge la partie la plus artisanale de son travail : **les ombres et
+l'intégration lumineuse** des éléments rapportés. Il livre des calques Photoshop
+éditables, pas des images aplaties.
+
+![Démo synthétique : beffroi en contre-jour, orque immergée, maison flottante](docs/img/demo_apercu.jpg)
+
+*Démo générée sans aucune photo (`examples/demo.py`) : ombre portée et ombre propre
+du beffroi en contre-jour, immersion et reflet de l'orque, rayons, étalonnage pastel.*
+
+## Documents
+
+1. [Analyse du style](docs/01-analyse-style.md)
+2. [Décomposition des tâches d'une œuvre](docs/02-taches-creation.md)
+3. [Architecture et feuille de route](docs/03-architecture.md)
+4. [ADN de style (YAML)](style/zak_style.yaml) : la « mémoire » de l'agent
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+export ANTHROPIC_API_KEY=...        # pour les commandes de l'agent
+```
+
+## Utilisation
+
+```bash
+# Assembler une scène (photo de fond + PNG détourés) en calques Photoshop
+python -m zak compose examples/scene_exemple.yaml -o sortie/
+#   -> sortie/apercu.png, calques PNG, construire_psd.jsx
+#   Photoshop : Fichier > Scripts > Parcourir... > construire_psd.jsx
+
+# Importer l'export Instagram de Zak (zip JSON) et mesurer son style
+python -m zak corpus instagram-zakeazy.zip -o corpus/
+
+# Agent Claude
+python -m zak imaginer "Lille sous la mer au coucher du soleil" -n 5
+python -m zak analyse photo_de_fond.jpg      # horizon, soleil, sol
+python -m zak lire oeuvre_de_zak.jpg         # décompose une œuvre
+python -m zak critique sortie/apercu.png     # relecture lumière / ombres
+
+# Démo et tests
+PYTHONPATH=. python examples/demo.py
+python -m pytest
+```
+
+## Récupérer les œuvres Instagram de Zak
+
+Sur Instagram : Paramètres › Espace Comptes › Vos informations et autorisations ›
+Télécharger vos informations › format **JSON**, qualité **élevée**, contenu
+« Publications ». Le .zip reçu se donne tel quel à `python -m zak corpus`.
