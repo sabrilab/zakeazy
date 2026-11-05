@@ -80,16 +80,16 @@ def match_to_plate(element: np.ndarray, plate: np.ndarray, strength: float = 0.6
 
 def pastel_grade(
     img: np.ndarray,
-    noir_releve: float = 0.04,
-    blanc_max: float = 0.98,
-    saturation: float = 0.96,
-    teinte_ombres: str = "#5F6F8A",
-    teinte_lumieres: str = "#FFE6C8",
-    force_split: float = 0.06,
+    noir_releve: float = 0.05,
+    blanc_max: float = 0.97,
+    saturation: float = 0.78,
+    teinte_ombres: str = "#5E7A7A",
+    teinte_lumieres: str = "#EEF5EC",
+    force_split: float = 0.10,
 ) -> np.ndarray:
     """Étalonnage « pastel Zak » : noirs relevés, hautes lumières adoucies,
-    couleurs quasi naturelles, léger froid dans les ombres et léger chaud dans
-    les lumières (pas de dominante rose / lavande : retour de Zak, 2026-11-05)."""
+    pastel désaturé calé sur « La Maison Verte » : ombres vers le bleu-vert
+    gris, lumières vers un blanc menthe, jamais de dominante rose / lavande."""
     rgb = img[..., :3]
     # Courbe : relève du point noir + épaule douce dans les hautes lumières.
     rgb = noir_releve + (blanc_max - noir_releve) * (1 - (1 - rgb) ** 1.15)

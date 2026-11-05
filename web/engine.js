@@ -11,7 +11,7 @@ export const STYLE = {
     ciel_haut: "#9FB8E0", ciel_bas: "#F6C8B8", soleil: "#FFE3B0",
     eau: "#7FC3C9", ombre: "#6F6A9A", contact: "#3E3A5C",
   },
-  grade: { noir: 0.04, blanc: 0.98, saturation: 0.96, ombres: "#5F6F8A", lumieres: "#FFE6C8", split: 0.06 },
+  grade: { noir: 0.05, blanc: 0.97, saturation: 0.78, ombres: "#5E7A7A", lumieres: "#EEF5EC", split: 0.10 },
 };
 
 const RAD = Math.PI / 180;

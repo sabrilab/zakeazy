@@ -486,7 +486,7 @@ const HASARD = {
   lieux: ["le beffroi de Lille", "la Vieille Bourse de Lille", "l'Opéra de Lille", "la Grand Place de Lille", "la Tour Eiffel", "l'Arc de Triomphe", "le Mont-Saint-Michel", "le Burj Al Arab", "le Taj Mahal", "Big Ben", "le Colisée", "la Sagrada Família", "Tower Bridge", "les Moaï de l'île de Pâques", "l'Opéra de Sydney", "un phare breton", "la Tour de Pise", "le Château de Chambord", "le Pont du Gard", "une gare Art nouveau"],
   mecaniques: ["déplacement", "immersion", "élévation", "échelle", "cadre", "métamorphose"],
   faune: ["des orques", "une baleine à bosse", "des raies manta", "des flamants roses", "des méduses lumineuses", "une pieuvre géante", "des dauphins", "des tortues de mer", "des carpes koï", "un cerf blanc", "des éléphants", "des montgolfières", "des cerisiers en fleurs", "une jungle tropicale"],
-  ambiances: ["plein soleil de midi", "matin clair et frais", "heure dorée", "ciel de nuages cotonneux", "lumière d'après l'orage", "ciel voilé lumineux"],
+  ambiances: ["ciel menthe laiteux", "matin brumeux clair", "jour diffus et aérien", "nuages blancs légers", "brume bleu-vert sur les lointains", "lumière douce d'après la pluie"],
 };
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 

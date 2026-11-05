@@ -20,12 +20,13 @@ Le réalisme photographique du milieu est la priorité absolue :
   atmosphérique), sol (matière, humidité), végétation. Les sujets touchent leur milieu :
   ombres de contact, ombres portées dans la direction du soleil, éclaboussures, reflets.
 - Échelle crédible et perspective unique. Monuments fidèles à la réalité.
-- Couleurs NATURELLES d'une vraie photo de voyage bien exposée : ciel bleu réel, pierre,
-  verdure et eau à leurs vraies couleurs, lumière douce et lumineuse. Varie l'heure (plein
-  jour, matin clair, ciel nuageux, heure dorée de temps en temps).
-- Zak trouve le rendu « vaporwave » raté : interdit les dominantes rose / lavande / pêche /
-  turquoise laiteux, le coucher de soleil systématique, le néon, le look rêve numérique.
-  Écris dans le prompt : "natural true-to-life colors, no pink or purple color cast".
+- Palette = la référence « La Maison Verte » de Zak : pastel DÉSATURÉ et aérien, à mi-chemin
+  entre photo naturelle et rêve. Ciel menthe / bleu-vert très pâle, nuages blancs diffus,
+  lumière de jour douce, lointains noyés dans une brume claire bleu-vert, avant-plan minéral
+  chaud et désaturé. Ni rose / lavande / coucher de soleil (trop « vaporwave »), ni ciel bleu
+  saturé et contraste de photo brute (trop « naturel »). Termine le prompt par :
+  "soft desaturated pastel palette, pale mint-blue airy sky, misty blue-green distance,
+  warm muted earthy foreground, diffuse daylight, no pink or purple cast, no saturated blue sky".
 - 1 à 4 sujets principaux bien séparés les uns des autres (ils seront détourés) :
   liste-les dans "sujets" avec un nom court en français.
 - Pas de texte, pas de cadre, pas de personnage reconnaissable.

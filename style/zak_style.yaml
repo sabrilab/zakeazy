@@ -1,4 +1,4 @@
-# ADN visuel de Zak Eazy — version 0.2 (retour de Zak du 2026-11-05 : moins « vaporwave »)
+# ADN visuel de Zak Eazy — version 0.3 (calée sur « La Maison Verte », retours de Zak du 2026-11-05)
 # Construit à partir des interviews publiques (2020-2025). Chaque valeur
 # chiffrée est une HYPOTHÈSE de départ à recaler sur le corpus Instagram
 # (voir `zak corpus`), puis à valider avec Zak lui-même.
@@ -22,30 +22,38 @@ themes:
   influences: [Salvador Dalí, Hayao Miyazaki (palette), Julien Tabet, Dragon Ball Z (Kaio), publicité, voyages]
 
 colorimetrie:
-  dominante: "lumineux et doux mais NATUREL : une vraie photo de voyage bien exposée, pas un filtre. Couleurs fidèles au lieu (ciel bleu, pierre, verdure, eau réelle)."
-  retour_zak_2026_11_05: "Les visuels générés étaient trop « vaporwave » (rose, lavande, turquoise et pêche partout, soleil couchant systématique). À éviter."
+  dominante: "pastel DÉSATURÉ et aérien, à mi-chemin entre une photo naturelle et un rêve : ciel menthe / bleu-vert très pâle, air laiteux, avant-plan terreux et chaud. La douceur vient de l'air et de la lumière diffuse, pas d'un filtre rose."
+  reference_absolue: "« La Maison Verte (The Green House) », Zak Eazy : maison haussmannienne penchée, portée par un arbre sur un rocher, montagnes brumeuses, petites montgolfières pâles au loin. Zak : « c'est vraiment un équilibre de ouf »."
+  historique_retours:
+    - "2026-11-05 matin : trop « vaporwave » (rose, lavande, pêche, coucher de soleil partout)."
+    - "2026-11-05 après-midi : la version corrigée trop naturelle (ciel bleu franc, contraste photo) va trop loin dans l'autre sens. Il faut « la jauge parfaite entre les 2 » = La Maison Verte."
   a_eviter:
-    - dominante rose / violet / lavande sur toute l'image
-    - ciel dégradé rose-pêche et eau turquoise laiteuse systématiques
-    - coucher de soleil à chaque image
-    - split toning lavande / pêche marqué, rendu néon, synthwave, rêve numérique
-    - noirs délavés au point de rendre l'image laiteuse
-  palette_reference:          # couleurs d'une vraie photo de jour, à recaler sur le corpus
-    ciel_haut:   "#5E8FC8"
-    ciel_bas:    "#BFD3E6"
-    soleil:      "#FFF1D6"
-    eau:         "#3F8FA0"
-    ombre:       "#4A5566"     # ombres neutres légèrement froides (bleu ciel), pas violettes
-    vegetation:  "#5E8A4E"
-    pierre:      "#D9C7AE"
-  lumieres_variees: [plein jour ensoleillé, matin clair, heure dorée (occasionnelle), ciel nuageux lumineux, après l'orage]
+    - dominante rose / violet / lavande / pêche
+    - coucher de soleil systématique, néon, synthwave
+    - ciel bleu saturé et contraste de photo brute (trop « naturel »)
+  a_viser:
+    - ciel menthe pâle presque blanc vers l'horizon, nuages blancs légers et diffus
+    - lumière de jour diffuse, douce, ombres légères
+    - lointains noyés dans une brume claire bleu-vert (perspective atmosphérique forte)
+    - avant-plan minéral chaud et désaturé (roche, terre), seul endroit vraiment sombre
+    - saturation globale basse, touches de vert végétal discrètes
+  palette_reference:          # mesurée sur « La Maison Verte » (capture Instagram)
+    ciel_haut:   "#D9EDED"
+    ciel_bas:    "#F0F2F0"
+    nuage:       "#E9F1F0"
+    soleil:      "#F7F8F2"
+    eau:         "#9CC5C2"
+    lointains:   "#96B0B1"
+    ombre:       "#5B5048"     # ombres chaudes et terreuses à l'avant-plan
+    vegetation:  "#8FA67C"
+    pierre:      "#93847A"
   etalonnage:
-    noir_releve: 0.04          # point noir à peine relevé
-    blanc_max: 0.98
-    saturation: 0.96           # quasi naturelle
-    teinte_ombres: "#5F6F8A"   # très léger froid dans les ombres
-    teinte_lumieres: "#FFE6C8" # très léger chaud dans les lumières
-    force_split: 0.06
+    noir_releve: 0.05
+    blanc_max: 0.97
+    saturation: 0.78           # nettement désaturé
+    teinte_ombres: "#5E7A7A"   # ombres vers le bleu-vert gris
+    teinte_lumieres: "#EEF5EC" # lumières vers un blanc menthe
+    force_split: 0.10
 
 lumiere_et_ombres:
   principe: "Surréaliste dans l'idée, réaliste dans le détail : grand soin des ombres des animaux et des rayons du soleil."
@@ -68,7 +76,7 @@ composition:
   - une image source forte (« LA photo ») dicte perspective, angle et horizon ; le monde est construit autour
   - monument comme point focal, souvent centré ou sur un tiers, vu en contre-plongée légère
   - horizon bas, grand ciel qui porte l'ambiance
-  - profondeur par perspective atmosphérique (brume légère et naturelle vers le lointain)
+  - profondeur par perspective atmosphérique forte (lointains noyés dans une brume claire bleu-vert)
   - formats Instagram : 4:5 portrait (1080x1350) en priorité
 
 matieres_et_textures:

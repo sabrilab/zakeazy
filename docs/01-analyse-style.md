@@ -45,9 +45,11 @@ Elles servent de grammaire à l'agent (`mecanique` dans les schémas Claude) :
 - **Retour de Zak (5 novembre 2026)** : les premières images générées étaient trop
   « vaporwave ». L'hypothèse de départ (coucher de soleil pastel systématique, ciel
   lavande → pêche, eau turquoise laiteux, ombres violettes) est **abandonnée**.
-- Direction actuelle : la douceur vient de la lumière, pas d'un filtre. Couleurs fidèles
-  au lieu comme une vraie photo de voyage, heures variées, noirs à peine relevés,
-  ombres neutres légèrement froides.
+- Le même jour, la version corrigée « naturelle » allait trop loin dans l'autre sens. Zak
+  demande « la jauge parfaite entre les 2 » et donne sa référence : **La Maison Verte**
+  ([image](../style/references/zak-la-maison-verte.jpg)). Pastel désaturé et aérien, ciel
+  menthe très pâle, lointains noyés dans une brume bleu-vert, avant-plan minéral chaud.
+  Palette mesurée sur l'image, dans `style/zak_style.yaml`.
 - Paramètres de départ dans [`style/zak_style.yaml`](../style/zak_style.yaml)
   (`colorimetrie.etalonnage`), à recaler sur le corpus.
 

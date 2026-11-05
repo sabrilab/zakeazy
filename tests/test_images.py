@@ -54,11 +54,14 @@ def test_etalonnage_releve_les_noirs():
 
 
 def test_etalonnage_sans_dominante_vaporwave():
-    # Retour de Zak (2026-11-05) : un gris doit rester quasi neutre, sans virer au rose ou au lavande.
-    img = np.full((4, 4, 4), 0.5, np.float32)
-    img[..., 3] = 1
-    r, g, b = color.pastel_grade(img)[0, 0, :3]
-    assert abs(r - g) < 0.02 and abs(b - g) < 0.02
+    # Retours de Zak (2026-11-05) : pas de rose ni de lavande (vert jamais en retrait),
+    # et un léger glissement bleu-vert comme dans « La Maison Verte ».
+    for v in (0.3, 0.5, 0.85):
+        img = np.full((4, 4, 4), v, np.float32)
+        img[..., 3] = 1
+        r, g, b = color.pastel_grade(img)[0, 0, :3]
+        assert g >= r - 0.002 and g >= b - 0.01
+        assert abs(r - g) < 0.04 and abs(b - g) < 0.04
 
 
 def test_harmonisation_garde_un_objet_sombre_sombre():
