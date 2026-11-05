@@ -1,0 +1,11 @@
+{
+  "name": "zak-eazy-agent",
+  "private": true,
+  "type": "module",
+  "description": "Zak Eazy Agent : un bouton, une œuvre dans l'univers de Zak Eazy.",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.5.0",
+    "@vercel/blob": "^2.8.2",
+    "@vercel/functions": "^3.10.6"
+  }
+}

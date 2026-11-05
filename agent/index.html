@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Zak Eazy Agent</title>
+  <meta name="description" content="Un bouton, une œuvre dans l'univers de Zak Eazy : monuments déplacés, faune marine, lumière pastel.">
+  <meta name="theme-color" content="#0b0b10">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zak Eazy">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Zak Eazy Agent">
+  <meta property="og:description" content="Un bouton, une œuvre dans l'univers de Zak Eazy.">
+  <meta property="og:image" content="https://zak-eazy-agent.vercel.app/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/assets/app.css?v=2">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Zak Eazy Agent">
+      <span class="sun" aria-hidden="true"></span>
+      <span class="word">Zak Eazy</span>
+      <span class="tag">Agent</span>
+    </a>
+    <span class="count" id="count" aria-live="polite"></span>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="hero">
+      <p class="kicker">Atelier de Zak Eazy</p>
+      <h1>La tête dans les nuages,<br><em>les pieds sur terre.</em></h1>
+      <p class="lede">Écris une idée ou appuie simplement sur le bouton&nbsp;: l'agent compose une œuvre dans l'univers de Zak. Lance-en plusieurs, elles se mettent en file.</p>
+      <div class="showcase" id="showcase">
+        <p class="sc-label">Touche une image pour reprendre son idée</p>
+        <div class="sc-rail"><div class="sc-track" id="scTrack"></div></div>
+      </div>
+    </section>
+    <section class="grid" id="grid" aria-label="Tes œuvres"></section>
+    <p class="foot" id="foot" hidden>Les œuvres restent sur ce téléphone. Touche une œuvre pour l'ouvrir et l'enregistrer.</p>
+  </main>
+
+  <div class="dock" id="dock">
+    <div class="chips" id="chips" aria-label="Idées rapides">
+      <button type="button" data-idea="Lille, le beffroi ou la Vieille Bourse, dans une scène surréaliste">Lille</button>
+      <button type="button" data-idea="Dubaï, le Burj Al Arab ou le Dubai Frame, dans une scène surréaliste">Dubaï</button>
+      <button type="button" data-idea="une ville engloutie par une mer turquoise, des poissons entre les façades">Sous la mer</button>
+      <button type="button" data-idea="un monument posé sur un nuage géant au coucher du soleil">Dans les nuages</button>
+      <button type="button" data-idea="un animal marin gigantesque qui nage autour d'un monument">Géants</button>
+      <button type="button" data-idea="une jungle tropicale qui envahit une place de ville">Jungle</button>
+      <button type="button" data-idea="un objet du quotidien abandonné au milieu d'un paysage immense">Objet perdu</button>
+    </div>
+    <form class="prompt" id="prompt" autocomplete="off">
+      <label class="sr" for="ideaInput">Ton prompt</label>
+      <textarea id="ideaInput" rows="1" maxlength="600" enterkeyhint="send" spellcheck="false" placeholder="Décris ton œuvre… (facultatif)"></textarea>
+      <button type="button" class="clear" id="ideaClear" aria-label="Effacer le prompt" hidden>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </form>
+    <button type="button" class="cta" id="go">
+      <span class="cta-main" id="goLabel">Générer une œuvre</span>
+      <span class="cta-sub" id="goSub">Surprise · ≈ 1 min</span>
+      <svg class="cta-spark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2c.5 4.8 2.7 7.5 8 8-5.3.5-7.5 3.2-8 8-.5-4.8-2.7-7.5-8-8 5.3-.5 7.5-3.2 8-8Z" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Œuvre">
+    <div class="v-backdrop"></div>
+    <div class="v-top">
+      <button type="button" class="v-btn" id="vClose" aria-label="Fermer">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <span class="v-count" id="vCount"></span>
+    </div>
+    <div class="v-stage" id="vStage"><img id="vImg" alt=""></div>
+    <div class="v-info">
+      <h2 id="vTitle"></h2>
+      <p id="vPitch"></p>
+      <div class="v-actions">
+        <button type="button" class="v-act primary" id="vSave">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Enregistrer
+        </button>
+        <button type="button" class="v-act" id="vAgain">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 9m0-5v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 15m0 5v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Variante
+        </button>
+        <button type="button" class="v-act ghost" id="vDelete" aria-label="Supprimer">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2m-7 0 1 12h8l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <p class="v-hint" id="vHint">Astuce : appuie longuement sur l'image pour l'enregistrer dans tes photos.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/assets/app.js?v=2" defer></script>
+</body>
+</html>

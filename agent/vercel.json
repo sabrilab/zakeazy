@@ -1,0 +1,52 @@
+{
+  "regions": [
+    "cdg1"
+  ],
+  "functions": {
+    "api/generate.js": {
+      "maxDuration": 300
+    },
+    "api/health.js": {
+      "maxDuration": 300
+    },
+    "api/status.js": {
+      "maxDuration": 20
+    }
+  },
+  "images": {
+    "sizes": [
+      384,
+      640,
+      1080
+    ],
+    "formats": [
+      "image/webp"
+    ],
+    "minimumCacheTTL": 31536000,
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "*.public.blob.vercel-storage.com"
+      },
+      {
+        "protocol": "https",
+        "hostname": "d8j0ntlcm91z4.cloudfront.net"
+      }
+    ]
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
