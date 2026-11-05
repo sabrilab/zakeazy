@@ -172,4 +172,15 @@ export async function credits(token) {
   return { status: r.status, body: text.slice(0, 300) };
 }
 
+// Test minimal de la passerelle (texte seulement), pour /api/health?k=...&probe=1.
+export async function probeClaude(token) {
+  const client = new Anthropic({ apiKey: token, baseURL: BASE, maxRetries: 0 });
+  try {
+    const r = await client.messages.create({ model: CLAUDE_MODEL, max_tokens: 16, messages: [{ role: "user", content: "Réponds juste : ok" }] });
+    return { ok: true, text: r.content.filter((b) => b.type === "text").map((b) => b.text).join("").slice(0, 40) };
+  } catch (err) {
+    return { ok: false, status: err?.status || null, error: String(err?.message || err).slice(0, 300) };
+  }
+}
+
 export const CONFIG = { CLAUDE_MODEL, CLAUDE_EFFORT, IMAGE_MODEL, IMAGE_QUALITY };

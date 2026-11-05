@@ -3,7 +3,7 @@
 // passerelle IA, et &run=1 lance une vraie génération pour un test de bout en bout.
 
 import { timingSafeEqual } from "node:crypto";
-import { CONFIG, credits, gatewayToken } from "./_lib/gateway.js";
+import { CONFIG, credits, gatewayToken, probeClaude } from "./_lib/gateway.js";
 import { cleanIdea, engine, sendError, startJob } from "./_lib/job.js";
 import { higgsfieldKey, higgsfieldModel } from "./_lib/higgsfield.js";
 import { storeReady } from "./_lib/store.js";
@@ -26,6 +26,7 @@ export default async function handler(req, res) {
   out.config = { ...CONFIG, HF_KEY: Boolean(higgsfieldKey()), HF_MODEL: higgsfieldModel() };
   out.auth = process.env.AI_GATEWAY_API_KEY ? "api-key" : req.headers["x-vercel-oidc-token"] ? "oidc-header" : process.env.VERCEL_OIDC_TOKEN ? "oidc-env" : "none";
   if (token) out.credits = await credits(token).catch((e) => ({ error: e.message }));
+  if (token && req.query.probe === "1") out.claude = await probeClaude(token);
   if (req.query.run === "1") {
     try {
       out.job = await startJob(req, cleanIdea(req.query.idee));
