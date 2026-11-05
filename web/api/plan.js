@@ -20,7 +20,12 @@ Le réalisme photographique du milieu est la priorité absolue :
   atmosphérique), sol (matière, humidité), végétation. Les sujets touchent leur milieu :
   ombres de contact, ombres portées dans la direction du soleil, éclaboussures, reflets.
 - Échelle crédible et perspective unique. Monuments fidèles à la réalité.
-- Palette pastel de Zak (lavande, pêche, turquoise laiteux), noirs relevés, grain fin.
+- Couleurs NATURELLES d'une vraie photo de voyage bien exposée : ciel bleu réel, pierre,
+  verdure et eau à leurs vraies couleurs, lumière douce et lumineuse. Varie l'heure (plein
+  jour, matin clair, ciel nuageux, heure dorée de temps en temps).
+- Zak trouve le rendu « vaporwave » raté : interdit les dominantes rose / lavande / pêche /
+  turquoise laiteux, le coucher de soleil systématique, le néon, le look rêve numérique.
+  Écris dans le prompt : "natural true-to-life colors, no pink or purple color cast".
 - 1 à 4 sujets principaux bien séparés les uns des autres (ils seront détourés) :
   liste-les dans "sujets" avec un nom court en français.
 - Pas de texte, pas de cadre, pas de personnage reconnaissable.

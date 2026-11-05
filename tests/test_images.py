@@ -47,10 +47,18 @@ def test_lab_aller_retour():
     assert np.allclose(color.lab_to_rgb(color.rgb_to_lab(rgb)), rgb, atol=2e-3)
 
 
-def test_etalonnage_pastel_releve_les_noirs():
+def test_etalonnage_releve_les_noirs():
     img = np.zeros((4, 4, 4), np.float32)
     img[..., 3] = 1
-    assert color.pastel_grade(img)[..., :3].min() >= 0.08
+    assert color.pastel_grade(img)[..., :3].min() >= 0.03
+
+
+def test_etalonnage_sans_dominante_vaporwave():
+    # Retour de Zak (2026-11-05) : un gris doit rester quasi neutre, sans virer au rose ou au lavande.
+    img = np.full((4, 4, 4), 0.5, np.float32)
+    img[..., 3] = 1
+    r, g, b = color.pastel_grade(img)[0, 0, :3]
+    assert abs(r - g) < 0.02 and abs(b - g) < 0.02
 
 
 def test_harmonisation_garde_un_objet_sombre_sombre():

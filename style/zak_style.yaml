@@ -1,4 +1,4 @@
-# ADN visuel de Zak Eazy — version 0.1
+# ADN visuel de Zak Eazy — version 0.2 (retour de Zak du 2026-11-05 : moins « vaporwave »)
 # Construit à partir des interviews publiques (2020-2025). Chaque valeur
 # chiffrée est une HYPOTHÈSE de départ à recaler sur le corpus Instagram
 # (voir `zak corpus`), puis à valider avec Zak lui-même.
@@ -22,31 +22,39 @@ themes:
   influences: [Salvador Dalí, Hayao Miyazaki (palette), Julien Tabet, Dragon Ball Z (Kaio), publicité, voyages]
 
 colorimetrie:
-  dominante: pastel, doux, lumineux (il est passé de tons sombres à des tons clairs)
-  palette_reference:          # hypothèse « coucher de soleil pastel », à recaler
-    ciel_haut:   "#9FB8E0"
-    ciel_bas:    "#F6C8B8"
-    soleil:      "#FFE3B0"
-    eau:         "#7FC3C9"
-    ombre:       "#6F6A9A"     # les ombres sont teintées violet/bleu, jamais noires
-    vegetation:  "#7FB58A"
-    pierre:      "#E8D6C4"
+  dominante: "lumineux et doux mais NATUREL : une vraie photo de voyage bien exposée, pas un filtre. Couleurs fidèles au lieu (ciel bleu, pierre, verdure, eau réelle)."
+  retour_zak_2026_11_05: "Les visuels générés étaient trop « vaporwave » (rose, lavande, turquoise et pêche partout, soleil couchant systématique). À éviter."
+  a_eviter:
+    - dominante rose / violet / lavande sur toute l'image
+    - ciel dégradé rose-pêche et eau turquoise laiteuse systématiques
+    - coucher de soleil à chaque image
+    - split toning lavande / pêche marqué, rendu néon, synthwave, rêve numérique
+    - noirs délavés au point de rendre l'image laiteuse
+  palette_reference:          # couleurs d'une vraie photo de jour, à recaler sur le corpus
+    ciel_haut:   "#5E8FC8"
+    ciel_bas:    "#BFD3E6"
+    soleil:      "#FFF1D6"
+    eau:         "#3F8FA0"
+    ombre:       "#4A5566"     # ombres neutres légèrement froides (bleu ciel), pas violettes
+    vegetation:  "#5E8A4E"
+    pierre:      "#D9C7AE"
+  lumieres_variees: [plein jour ensoleillé, matin clair, heure dorée (occasionnelle), ciel nuageux lumineux, après l'orage]
   etalonnage:
-    noir_releve: 0.10          # point noir de sortie (0-1) : pas de noir pur
-    blanc_max: 0.97
-    saturation: 0.88           # légère désaturation globale
-    teinte_ombres: "#7A6FB0"   # split toning ombres -> lavande
-    teinte_lumieres: "#FFD2B0" # split toning hautes lumières -> pêche
-    force_split: 0.18
+    noir_releve: 0.04          # point noir à peine relevé
+    blanc_max: 0.98
+    saturation: 0.96           # quasi naturelle
+    teinte_ombres: "#5F6F8A"   # très léger froid dans les ombres
+    teinte_lumieres: "#FFE6C8" # très léger chaud dans les lumières
+    force_split: 0.06
 
 lumiere_et_ombres:
   principe: "Surréaliste dans l'idée, réaliste dans le détail : grand soin des ombres des animaux et des rayons du soleil."
   regles:
-    - une seule source principale (soleil bas, souvent couchant) ; direction cohérente pour TOUS les éléments
+    - une seule source principale (le soleil, à des heures variées) ; direction cohérente pour TOUS les éléments
     - ombre portée = projection sur le plan du sol, longueur liée à la hauteur du soleil
     - pénombre qui s'élargit avec la distance au point de contact
     - ombre de contact dense et courte sous chaque appui (pattes, base des bâtiments)
-    - couleur d'ombre = couleur du ciel assombrie, mode Produit (multiply)
+    - couleur d'ombre = couleur du ciel assombrie, sans teinte violette ajoutée, mode Produit (multiply)
     - sur l'eau : reflet inversé, ondulé, atténué, plutôt qu'une ombre dure
     - light wrap : les bords des éléments prennent la lumière du décor
     - rayons de soleil volumétriques en mode Superposition/Écran
@@ -60,7 +68,7 @@ composition:
   - une image source forte (« LA photo ») dicte perspective, angle et horizon ; le monde est construit autour
   - monument comme point focal, souvent centré ou sur un tiers, vu en contre-plongée légère
   - horizon bas, grand ciel qui porte l'ambiance
-  - profondeur par perspective atmosphérique (brume teintée vers le lointain)
+  - profondeur par perspective atmosphérique (brume légère et naturelle vers le lointain)
   - formats Instagram : 4:5 portrait (1080x1350) en priorité
 
 matieres_et_textures:

@@ -11,7 +11,7 @@ export const STYLE = {
     ciel_haut: "#9FB8E0", ciel_bas: "#F6C8B8", soleil: "#FFE3B0",
     eau: "#7FC3C9", ombre: "#6F6A9A", contact: "#3E3A5C",
   },
-  grade: { noir: 0.10, blanc: 0.97, saturation: 0.88, ombres: "#7A6FB0", lumieres: "#FFD2B0", split: 0.18 },
+  grade: { noir: 0.04, blanc: 0.98, saturation: 0.96, ombres: "#5F6F8A", lumieres: "#FFE6C8", split: 0.06 },
 };
 
 const RAD = Math.PI / 180;
@@ -315,7 +315,7 @@ export function grain(W, H, amount = 0.035) {
   return { canvas: out, mode: "overlay", opacity: 0.6 };
 }
 
-// Étalonnage « pastel Zak » (port de color.pastel_grade).
+// Étalonnage « Zak » (naturel, doux) (port de color.pastel_grade).
 export function pastelGrade(ctx, W, H, g = STYLE.grade) {
   const img = ctx.getImageData(0, 0, W, H);
   const d = img.data;

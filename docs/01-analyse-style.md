@@ -42,10 +42,12 @@ Elles servent de grammaire à l'agent (`mecanique` dans les schémas Claude) :
 
 - **Pastel, doux, lumineux.** Tous les articles le relèvent ; Zak attribue cette palette
   à l'influence de **Miyazaki**. Il dit être passé de tons sombres à ses débuts à des tons clairs.
-- *(hypothèse)* Heure dorée / coucher de soleil dominant : ciels bleu lavande → pêche,
-  eaux turquoise laiteux, pierre crème.
-- *(hypothèse)* **Pas de noir pur** : point noir relevé, ombres teintées (violet / bleu-gris)
-  plutôt que neutres.
+- **Retour de Zak (5 novembre 2026)** : les premières images générées étaient trop
+  « vaporwave ». L'hypothèse de départ (coucher de soleil pastel systématique, ciel
+  lavande → pêche, eau turquoise laiteux, ombres violettes) est **abandonnée**.
+- Direction actuelle : la douceur vient de la lumière, pas d'un filtre. Couleurs fidèles
+  au lieu comme une vraie photo de voyage, heures variées, noirs à peine relevés,
+  ombres neutres légèrement froides.
 - Paramètres de départ dans [`style/zak_style.yaml`](../style/zak_style.yaml)
   (`colorimetrie.etalonnage`), à recaler sur le corpus.
 
