@@ -32,6 +32,8 @@ export class GenError extends Error {
 // Traduit une réponse d'erreur de la passerelle en message lisible par Zak.
 function explain(status, text) {
   const t = (text || "").toLowerCase();
+  if (t.includes("customer_verification_required") || t.includes("credit card"))
+    return new GenError("La passerelle IA de Vercel attend une carte bancaire pour débloquer ses crédits.", { status: 402, code: "card", detail: text });
   if (status === 402 || t.includes("insufficient") || t.includes("credit") || t.includes("balance"))
     return new GenError("Les crédits IA sont épuisés pour le moment.", { status: 402, code: "credits", detail: text });
   if (status === 429)
@@ -60,10 +62,20 @@ function valid(plan) {
   );
 }
 
+// Claude en direct si ANTHROPIC_API_KEY est défini, sinon via la passerelle.
+function claude(token) {
+  if (process.env.ANTHROPIC_API_KEY)
+    return { client: new Anthropic({ maxRetries: 1 }), model: process.env.ANTHROPIC_MODEL || "claude-opus-5-5" };
+  if (token) return { client: new Anthropic({ apiKey: token, baseURL: BASE, maxRetries: 1 }), model: CLAUDE_MODEL };
+  return null;
+}
+
 async function askClaude(token, t, idee, signal) {
-  const client = new Anthropic({ apiKey: token, baseURL: BASE, maxRetries: 1 });
+  const c = claude(token);
+  if (!c) throw new Error("aucun accès à Claude");
+  const { client } = c;
   const base = {
-    model: CLAUDE_MODEL,
+    model: c.model,
     max_tokens: 4000,
     system: SYSTEM,
     messages: [{ role: "user", content: demande(t, idee) }],
@@ -94,7 +106,6 @@ export async function planArtwork({ token, t, idee }) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 25_000);
   try {
-    if (!token) throw new Error("pas de jeton passerelle");
     const plan = await askClaude(token, t, idee, ctrl.signal);
     return {
       titre: plan.titre.trim().slice(0, 60),
@@ -174,10 +185,11 @@ export async function credits(token) {
 
 // Test minimal de la passerelle (texte seulement), pour /api/health?k=...&probe=1.
 export async function probeClaude(token) {
-  const client = new Anthropic({ apiKey: token, baseURL: BASE, maxRetries: 0 });
+  const c = claude(token);
+  if (!c) return { ok: false, error: "aucun accès à Claude" };
   try {
-    const r = await client.messages.create({ model: CLAUDE_MODEL, max_tokens: 16, messages: [{ role: "user", content: "Réponds juste : ok" }] });
-    return { ok: true, text: r.content.filter((b) => b.type === "text").map((b) => b.text).join("").slice(0, 40) };
+    const r = await c.client.messages.create({ model: c.model, max_tokens: 16, messages: [{ role: "user", content: "Réponds juste : ok" }] });
+    return { ok: true, via: process.env.ANTHROPIC_API_KEY ? "anthropic" : "gateway", text: r.content.filter((b) => b.type === "text").map((b) => b.text).join("").slice(0, 40) };
   } catch (err) {
     return { ok: false, status: err?.status || null, error: String(err?.message || err).slice(0, 300) };
   }

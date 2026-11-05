@@ -19,6 +19,10 @@ garde l'image lui-même.
 
 Aucune clé n'est envoyée au navigateur.
 
+La passerelle IA de Vercel n'accepte les requêtes qu'une fois une carte bancaire enregistrée
+sur l'équipe (ce qui débloque aussi ses crédits gratuits). Sans Claude, l'agent compose le prompt
+lui-même à partir de la même grammaire.
+
 ## Variables d'environnement
 
 | Variable | Rôle |
@@ -28,6 +32,7 @@ Aucune clé n'est envoyée au navigateur.
 | `HF_MODEL` | Chemin (ou URL) de l'endpoint du modèle Higgsfield, tel que la console l'affiche. |
 | `HF_PARAMS` | Facultatif : JSON ajouté au corps de la requête Higgsfield. |
 | `AI_GATEWAY_API_KEY` | Facultatif : sur Vercel, le jeton OIDC du déploiement suffit. |
+| `ANTHROPIC_API_KEY` | Facultatif : Claude en direct plutôt que par la passerelle. |
 | `CLAUDE_MODEL`, `IMAGE_MODEL`, `IMAGE_QUALITY` | Facultatifs : modèles de la passerelle. |
 | `DAILY_LIMIT` | Plafond d'œuvres par jour (80 par défaut, avec Blob). |
 | `ACCESS_CODE` | Facultatif : exige `?code=...` dans le lien partagé. |

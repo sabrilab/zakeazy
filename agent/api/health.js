@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   out.config = { ...CONFIG, HF_KEY: Boolean(higgsfieldKey()), HF_MODEL: higgsfieldModel() };
   out.auth = process.env.AI_GATEWAY_API_KEY ? "api-key" : req.headers["x-vercel-oidc-token"] ? "oidc-header" : process.env.VERCEL_OIDC_TOKEN ? "oidc-env" : "none";
   if (token) out.credits = await credits(token).catch((e) => ({ error: e.message }));
-  if (token && req.query.probe === "1") out.claude = await probeClaude(token);
+  if (req.query.probe === "1") out.claude = await probeClaude(token);
   if (req.query.run === "1") {
     try {
       out.job = await startJob(req, cleanIdea(req.query.idee));
